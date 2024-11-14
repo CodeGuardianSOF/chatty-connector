@@ -4,6 +4,7 @@ export interface Message {
   sender: User;
   timestamp: Date;
   status: "sent" | "delivered" | "read";
+  chatId: string;
 }
 
 export interface User {
@@ -19,4 +20,10 @@ export interface Chat {
   participants: User[];
   lastMessage?: Message;
   unreadCount: number;
+}
+
+export interface SendMessagePayload {
+  content: string;
+  chatId: string;
+  senderId: string;
 }

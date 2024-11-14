@@ -2,6 +2,7 @@ import { Chat, Message, User } from "@/lib/types";
 import { MessageBubble } from "./MessageBubble";
 import { MessageInput } from "./MessageInput";
 import { Avatar } from "./Avatar";
+import { useRef, useEffect } from "react";
 
 interface ChatWindowProps {
   chat: Chat;
@@ -16,7 +17,12 @@ export const ChatWindow = ({
   currentUser,
   onSendMessage,
 }: ChatWindowProps) => {
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const otherParticipant = chat.participants[0];
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   return (
     <div className="flex-1 flex flex-col h-screen">
@@ -41,6 +47,7 @@ export const ChatWindow = ({
             isOwn={message.sender.id === currentUser.id}
           />
         ))}
+        <div ref={messagesEndRef} />
       </div>
       <MessageInput onSend={onSendMessage} />
     </div>
