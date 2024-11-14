@@ -18,12 +18,22 @@ const users = new Map();
 
 io.on("connection", (socket) => {
   const userId = socket.handshake.auth.userId;
-  users.set(userId, socket.id);
+  const userData = {
+    id: userId,
+    name: "User " + userId,
+    avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`,
+    online: true,
+  };
+  
+  users.set(userId, { ...userData, socketId: socket.id });
+  
+  // Send updated user list to all clients
+  io.emit("userList", Array.from(users.values()).map(({ socketId, ...user }) => user));
 
   socket.on("message", (data) => {
-    const recipientSocket = Array.from(users.values()).find(
-      (id) => id !== socket.id
-    );
+    const [user1, user2] = data.chatId.split("-");
+    const recipientId = user1 === data.senderId ? user2 : user1;
+    const recipientSocket = users.get(recipientId)?.socketId;
     
     if (recipientSocket) {
       io.to(recipientSocket).emit("message", {
@@ -43,6 +53,7 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     users.delete(userId);
+    io.emit("userList", Array.from(users.values()).map(({ socketId, ...user }) => user));
   });
 });
 
